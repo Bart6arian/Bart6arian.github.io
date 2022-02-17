@@ -1,5 +1,5 @@
 $(document).ready(function() {
-   const apiRoot = 'https://kodilla-tasks-v1.herokuapp.com/v1/task/';
+   const apiRoot = 'https://kodilla-tasks-v1.herokuapp.com/v1';
    const trelloApiRoot = 'https://kodilla-tasks-v1.herokuapp.com/v1/trello/';
    const datatableRowTemplate = $('[data-datatable-row-template]').children()[0];
    const $tasksContainer = $('[data-tasks-container]');
@@ -7,7 +7,7 @@ $(document).ready(function() {
    var availableBoards = {};
    var availableTasks = {};
 
-   // init
+   getAllTasks();
 
    function getAllAvailableBoards(callback, callbackArgs) {
       var requestUrl = trelloApiRoot + 'boards';
@@ -15,9 +15,9 @@ $(document).ready(function() {
       $.ajax({
          url: requestUrl,
          method: 'GET',
-         contentType:'application/json',
-         success: function(boards) { callback(callbackArgs, boards)}
-      });
+         contentType: 'application/json',
+         success: function(boards) { callback(callbackArgs, boards); }
+     });
    }
 
    function createElement(data) {
@@ -109,7 +109,9 @@ $(document).ready(function() {
       var requestUrl = apiRoot + 'tasks';
 
       $.ajax({
-         url: requestUrl + '/' + taskId,
+         url: requestUrl + '/?' + $.param({
+            taskId: taskId
+         }),
          method: 'DELETE',
          success: function() {
             parentEl.slideUp(400, function() { parentEl.remove(); });
@@ -135,7 +137,11 @@ $(document).ready(function() {
             title: taskTitle,
             content: taskContent
          }),
-        success:getAllTasks
+        complete: function(data) {
+           if (data.status === 200) {
+              getAllTasks();
+           }
+        }
       });
    }
 
